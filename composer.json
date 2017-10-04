@@ -1,0 +1,10 @@
+{
+    "name": "magnetar/mailing",
+    "autoload": {
+        "psr-4": {
+            "Magnetar\\Mailing\\": "src"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
