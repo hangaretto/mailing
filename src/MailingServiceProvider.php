@@ -21,9 +21,9 @@ class MailingServiceProvider extends ServiceProvider
             __DIR__.'/config/mailing.php' => config_path('magnetar/mailing.php')
         ], 'config');
 
-        $this->publishes([
-            __DIR__ . '/migrations' => database_path('migrations')
-        ], 'migrations');
+//        $this->publishes([
+//            __DIR__ . '/migrations' => database_path('migrations')
+//        ], 'migrations');
     }
 
     /**
