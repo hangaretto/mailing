@@ -16,7 +16,7 @@ class DefaultDriver
      *                      $data['subject'];
      *                      $data['to'];
      *                      $data['html'];
-     * @return string
+     * @return array
      * @throws
      */
     public static function send($data)

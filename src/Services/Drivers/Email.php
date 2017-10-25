@@ -12,7 +12,7 @@ class Email
      *
      * @param array $data
      * @param bool $is_system
-     * @return string|null
+     * @return array|null
      */
     public static function send($data, $is_system = true) {
 
