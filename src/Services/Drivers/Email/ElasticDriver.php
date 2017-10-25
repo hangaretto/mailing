@@ -1,6 +1,7 @@
 <?php
 namespace Magnetar\Mailing\Services\Drivers\Email;
 
+use Magnetar\Log\Services\LogServices;
 use Magnetar\Mailing\Services\HtmlToText;
 
 class ElasticDriver
@@ -23,11 +24,11 @@ class ElasticDriver
      */
     public static function send($data)
     {
-        try{
+        try {
 
             $html = new HtmlToText($data['html']);
             $post = [
-                'apikey' => $data['apiKey'],
+                'apikey' => $data['api_key'],
                 'username' => $data['username'],
                 'from' => $data['from'],
                 'fromName' => $data['from_name'],
@@ -51,10 +52,11 @@ class ElasticDriver
             $result=curl_exec ($ch);
             curl_close ($ch);
 
+            $result = json_decode($result, true);
+
             return $result;
-        }
-        catch(\Exception $ex){
-            \Log::error($ex->getMessage());
+        } catch(\Exception $ex) {
+            LogServices::send('admin_log', ['text' => $ex->getMessage().'(Magnetar\Mailing\Services\Drivers\Email\ElasticDriver)']);
         }
 
         return null;

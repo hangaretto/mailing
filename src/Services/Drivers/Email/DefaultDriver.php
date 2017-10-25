@@ -1,6 +1,7 @@
 <?php
 namespace Magnetar\Mailing\Services\Drivers\Email;
 
+use Magnetar\Log\Services\LogServices;
 use Mail;
 
 class DefaultDriver
@@ -20,16 +21,18 @@ class DefaultDriver
      */
     public static function send($data)
     {
-        try{
+        try {
+
             Mail::send([], [], function($message) use($data) {
                 $message->setBody($data['html'], 'text/html');
                 $message->to($data['to']);
                 $message->subject($data['subject']);
                 $message->from($data['from'], $data['from_name']);
             });
-        }
-        catch(\Exception $ex){
-            \Log::error($ex->getMessage());
+
+            return ['success' => true];
+        } catch(\Exception $ex) {
+            LogServices::send('admin_log', ['text' => $ex->getMessage().'(Magnetar\Mailing\Services\Drivers\Email\DefaultDriver)']);
         }
         return null;
     }

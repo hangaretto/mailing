@@ -1,6 +1,8 @@
 <?php
 namespace Magnetar\Mailing\Services\Drivers\Sms;
 
+use Magnetar\Log\Services\LogServices;
+
 class IqDriver
 {
     const ERROR_EMPTY_RESPONSE = 'errorEmptyResponse';
@@ -15,7 +17,9 @@ class IqDriver
      *                      $data['password'];
      *                      $data['phone'];
      *                      $data['text'];
-     * @return string
+     *                      $data['sender'];
+     *                      $data['statusQueueName'];
+     * @return array
      * @throws
      */
     public static function send($data)
@@ -26,13 +30,13 @@ class IqDriver
         $json = json_encode([
             'messages' => [
                 'phone' => $data['phone'],
-                'sender' => 'SMS DUCKOHT',
+                'sender' => $data['sender'],
                 'client_id' => 1,
                 'text' => $data['text']
             ],
             'login' => $data['login'],
             'password' => $data['password'],
-            'statusQueueName' => 'testQueue',
+            'statusQueueName' => $data['statusQueueName'],
         ]);
 
         $client = curl_init(self::$url);
@@ -46,12 +50,15 @@ class IqDriver
         $body = curl_exec($client);
         curl_close($client);
 
-        if (empty($body))
-            \Log::error(self::ERROR_EMPTY_RESPONSE);
-        else if(substr_count($body, 'accepted') == 0)
-            \Log::error($body);
+        if (empty($body)) {
+            LogServices::send('admin_log', ['text' => self::ERROR_EMPTY_RESPONSE . '(Magnetar\Mailing\Services\Drivers\Sms\IqDriver)']);
+            return ['success' => false];
+        } else if (substr_count($body, 'accepted') == 0) {
+            LogServices::send('admin_log', ['text' => $body . '(Magnetar\Mailing\Services\Drivers\Sms\IqDriver)']);
+            return ['success' => false, 'data' => json_decode($body, true)];
+        }
 
-        return $body;
+        return ['success' => true, 'data' => json_decode($body, true)];
 
     }
 

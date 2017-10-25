@@ -7,9 +7,8 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Magnetar\Mailing\Services\Drivers\Email\DefaultDriver;
-use Magnetar\Mailing\Services\Drivers\Email\ElasticDriver;
-use Magnetar\Mailing\Services\Drivers\Sms\IqDriver;
+use Magnetar\Mailing\Services\Drivers\Email;
+use Magnetar\Mailing\Services\Drivers\Sms;
 
 class MailingJob implements ShouldQueue
 {
@@ -34,50 +33,19 @@ class MailingJob implements ShouldQueue
     /**
      * Execute mailing job.
      *
-     * @return void
+     * @return string|null
      */
     public function handle()
     {
         switch ($this->type) {
             case 'sms':
-                switch ($this->data['driver']) {
-                    case 'iq':
-                        if ($this->is_system == true) {
-                            $this->data['login'] = config('magnetar.mailing.sms.iq.login');
-                            $this->data['password'] = config('magnetar.mailing.sms.iq.password');
-                        }
-
-                        IqDriver::send($this->data);
-                        break;
-                    default:
-                        return false;
-                }
+                return Sms::send($this->data, $this->is_system);
                 break;
             case 'email':
-                if($this->is_system == true) {
-                    $this->data['from'] = config('mail.from.address');
-                    $this->data['from_name'] = config('mail.from.name');
-                    $this->data['driver'] = config('mail.driver');
-                }
-
-                switch ($this->data['driver']) {
-                    case 'elastic':
-                        if($this->is_system == true) {
-                            $this->data['api_key'] = config('magnetar.mailing.email.elastic.api_key');
-                            $this->data['username'] = config('magnetar.mailing.email.elastic.username');
-                        }
-
-                        ElasticDriver::send($this->data);
-                        break;
-                    default:
-                        DefaultDriver::send($this->data);
-                        break;
-                }
+                return Email::send($this->data, $this->is_system);
                 break;
             default:
-                return false;
+                return null;
         }
-
-        return true;
     }
 }
